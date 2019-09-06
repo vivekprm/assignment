@@ -1,7 +1,12 @@
 package com.bookmarks.bookmarksstore.rest;
 
 import com.bookmarks.bookmarksstore.entity.Bookmark;
+import com.bookmarks.bookmarksstore.entity.Comment;
+import com.bookmarks.bookmarksstore.entity.User;
 import com.bookmarks.bookmarksstore.repository.BookmarkRepository;
+import com.bookmarks.bookmarksstore.repository.CommentRepository;
+import com.bookmarks.bookmarksstore.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +22,12 @@ import java.util.stream.Stream;
 @Component
 public class BookmarkCommandLineRunner implements CommandLineRunner {
     private final BookmarkRepository bookmarkRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     public BookmarkCommandLineRunner(BookmarkRepository bookmarkRepository) {
         this.bookmarkRepository = bookmarkRepository;
@@ -63,5 +74,55 @@ public class BookmarkCommandLineRunner implements CommandLineRunner {
                                 titleNotesMap.get(title), titleTagsMap.get(title)))
         );
         bookmarkRepository.findAll().forEach(System.out::println);
+
+        setUpUsers();
+
+        setUpComments();
+    }
+
+    private void setUpComments() {
+        commentRepository.deleteAll();
+        commentRepository.save(new Comment("Test1", "This is first test comment."));
+        commentRepository.save(new Comment("Test2", "This is second test comment."));
+
+        // fetch all customers
+        System.out.println("Comments found with findAll():");
+        System.out.println("-------------------------------");
+        for (Comment comment : commentRepository.findAll()) {
+            System.out.println(comment);
+        }
+        System.out.println();
+
+        // fetch an individual comment
+        System.out.println("Comment found with findByTitle('Test1'):");
+        System.out.println("--------------------------------");
+        System.out.println(commentRepository.findByTitle("Test1"));
+    }
+
+    private void setUpUsers() {
+        userRepository.deleteAll();
+
+        // save a couple of customers
+        userRepository.save(new User("Alice", "Smith"));
+        userRepository.save(new User("Bob", "Smith"));
+
+        // fetch all customers
+        System.out.println("Customers found with findAll():");
+        System.out.println("-------------------------------");
+        for (User user : userRepository.findAll()) {
+            System.out.println(user);
+        }
+        System.out.println();
+
+        // fetch an individual customer
+        System.out.println("Customer found with findByFirstName('Alice'):");
+        System.out.println("--------------------------------");
+        System.out.println(userRepository.findByFirstName("Alice"));
+
+        System.out.println("Customers found with findByLastName('Smith'):");
+        System.out.println("--------------------------------");
+        for (User user : userRepository.findByLastName("Smith")) {
+            System.out.println(user);
+        }
     }
 }
